@@ -1,0 +1,101 @@
+/*
+ * Generic DWMAC platform driver
+ *
+ * Copyright (C) 2007-2011  STMicroelectronics Ltd
+ * Copyright (C) 2015 Joachim Eastwood <manabian@gmail.com>
+ *
+ * This file is licensed under the terms of the GNU General Public
+ * License version 2. This program is licensed "as is" without any
+ * warranty of any kind, whether express or implied.
+ */
+
+#include <linux/module.h>
+#include <linux/of.h>
+#include <linux/platform_device.h>
+
+#include "stmmac.h"
+#include "stmmac_platform.h"
+
+#define LGMMAC_RESOURCE_NAME 	"lx28xxmaceth"
+
+static int dwmac_lx28xx_probe(struct platform_device *pdev)
+{
+	struct plat_stmmacenet_data *plat_dat;
+	struct stmmac_resources stmmac_res;
+	int ret;
+
+	//printk("%s %s %d\n", __FILE__, __FUNCTION__, __LINE__);
+	ret = stmmac_get_platform_resources(pdev, &stmmac_res);
+	if (ret)
+		return ret;
+
+	if (pdev->dev.of_node) {
+		plat_dat = stmmac_probe_config_dt(pdev, &stmmac_res.mac);
+		if (IS_ERR(plat_dat)) {
+			dev_err(&pdev->dev, "dt configuration failed\n");
+			return PTR_ERR(plat_dat);
+		}
+	} else {
+		plat_dat = dev_get_platdata(&pdev->dev);
+		if (!plat_dat) {
+			dev_err(&pdev->dev, "no platform data provided\n");
+			return  -EINVAL;
+		}
+
+		/* Set default value for multicast hash bins */
+		plat_dat->multicast_filter_bins = HASH_TABLE_SIZE;
+
+		/* Set default value for unicast filter entries */
+		plat_dat->unicast_filter_entries = 1;
+	}
+
+	/* Custom initialisation (if needed) */
+	if (plat_dat->init) {
+		ret = plat_dat->init(pdev, plat_dat->bsp_priv);
+		if (ret)
+			goto err_remove_config_dt;
+	}
+
+	ret = stmmac_dvr_probe(&pdev->dev, plat_dat, &stmmac_res);
+	if (ret)
+		goto err_exit;
+
+	//printk("%s %s %d\n", __FILE__, __FUNCTION__, __LINE__);
+	return 0;
+
+err_exit:
+	if (plat_dat->exit)
+		plat_dat->exit(pdev, plat_dat->bsp_priv);
+err_remove_config_dt:
+	if (pdev->dev.of_node)
+		stmmac_remove_config_dt(pdev, plat_dat);
+
+	return ret;
+}
+
+static const struct of_device_id dwmac_generic_match[] = {
+	{ .compatible = "st,spear600-gmac"},
+	{ .compatible = "snps,dwmac-3.50a"},
+	{ .compatible = "snps,dwmac-3.610"},
+	{ .compatible = "snps,dwmac-3.70a"},
+	{ .compatible = "snps,dwmac-3.710"},
+	{ .compatible = "snps,dwmac-4.00"},
+	{ .compatible = "snps,dwmac-4.10a"},
+	{ .compatible = "snps,dwmac"},
+	{ }
+};
+MODULE_DEVICE_TABLE(of, dwmac_generic_match);
+
+static struct platform_driver dwmac_lx28xx_plf_driver = {
+	.probe  = dwmac_lx28xx_probe,
+	.remove = stmmac_pltfr_remove,
+	.driver = {
+		.name           = LGMMAC_RESOURCE_NAME,
+		.pm		= &stmmac_pltfr_pm_ops,
+		.of_match_table = of_match_ptr(dwmac_generic_match),
+	},
+};
+module_platform_driver(dwmac_lx28xx_plf_driver);
+
+MODULE_DESCRIPTION("LogMicro lx28xx dwmac platform driver");
+MODULE_LICENSE("GPL v2");

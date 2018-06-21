@@ -1,0 +1,53 @@
+if ARCH_LX28XX
+menu "Logmicro LX28XX Implementations"
+
+config MACH_LX28XX_EVM
+    bool "Xiangjing LX28XX EVM"
+    default ARCH_LX28XX
+    depends on ARCH_LX28XX
+    help
+      Configure this option to specify the whether the board used
+      for development is a LX28XX EVM
+
+config LX28XX_NET_DMA
+	bool "Select T18xx Enthernet DMA mode"
+	default n
+	   help
+	     Configure this option to enable T18xx Enthernet DMA to rx/tx (2012_03_15 version don't support directly dma tx, for this mac 
+		 dont support 2 byte align transmittion
+
+
+config FPGA_DEBUG
+	bool "Select this for FPGA TEST"
+	default n
+	   help
+	     Configure this option to specify use whick CLOCK (CLK_FPGA or CLK_CHIP)
+
+config OV_SENSOR
+	bool "Select this for OV Sensor TEST(default Mt9v112)"
+	default n
+	   help
+	     select which sensor
+
+
+config LX28XX_IC
+	bool "Select this for IC TEST"
+	default n
+	   help
+	     Configure this option to specify use whick CLOCK (CLK_FPGA or CLK_CHIP)
+
+config ARM7_DECODER
+	bool "Select this for FPGA decoder TEST"
+	default n
+	   help
+	     for FPGA decoder TEST
+
+
+
+
+
+#choice
+#endchoice
+
+endmenu
+endif
