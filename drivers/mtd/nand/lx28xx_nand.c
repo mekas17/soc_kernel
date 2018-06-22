@@ -501,7 +501,7 @@ static int t18_nand_read_page_hwecc(struct mtd_info *mtd, struct nand_chip *chip
 	u8 *pd;
 
 	//printk("t18 nand read one page hwecc @page %d\n", page);
-	printk("@p%d\n", page);
+	//printk("@p%d\n", page);
 	//printk("eccsize = %d, eccbytes = %d, eccsteps = %d\n", eccsize, eccbytes, eccsteps);
 	//mdelay(1);
 	udelay(20);
@@ -591,7 +591,7 @@ t18_nand_read_exit:
 		else
 			mtd->ecc_stats.corrected++;
 	}
-	printk("ecc_stats.failed = %d, ecc_status.corrected = %d\n", mtd->ecc_stats.failed, mtd->ecc_stats.corrected);
+	//printk("ecc_stats.failed = %d, ecc_status.corrected = %d\n", mtd->ecc_stats.failed, mtd->ecc_stats.corrected);
 	return 0;
 }
 
@@ -615,7 +615,7 @@ static int t18_nand_write_page_hwecc(struct mtd_info *mtd, struct nand_chip *chi
 	u8 *pd;
 	int j;
 
-	printk("t18 nand write page hwecc\n");
+	//printk("t18 nand write page hwecc\n");
 	for (i = 0; eccsteps; eccsteps--, i += eccbytes, p += eccsize) {
 		memcpy((u8 *)psrc, p, eccsize);
 		t18_nand_ecc_encoder(mtd, (u8 *)psrc, (u8 *)pdst);
@@ -917,7 +917,7 @@ static int __init nand_freechip_probe(struct platform_device *pdev)
 	 * have this special casing for the T18xx EVM is to work
 	 * with boot-from-SPI...
 	 */
-	printk("%s %s %d\n", __FILE__, __FUNCTION__, __LINE__);
+	//printk("%s %s %d\n", __FILE__, __FUNCTION__, __LINE__);
 	nand_t18xxevm_flash_init(info);
 
 	spin_lock_irq(&freechip_nand_lock);
@@ -988,7 +988,7 @@ syndrome_done:
 	if (ret < 0)
 		goto err_scan;
 
-	printk("%s %s %d\n", __FILE__, __FUNCTION__, __LINE__);
+	//printk("%s %s %d\n", __FILE__, __FUNCTION__, __LINE__);
 	if (mtd_has_partitions()) {
 		struct mtd_partitions	mtd_parts;
 		int			mtd_parts_nb = 0;
@@ -1022,7 +1022,7 @@ syndrome_done:
 				pdata->nr_parts, info->chip.mtd.name);
 	}
 
-	printk("%s %s %d\n", __FILE__, __FUNCTION__, __LINE__);
+	//printk("%s %s %d\n", __FILE__, __FUNCTION__, __LINE__);
 	/* If there's no partition info, just package the whole chip
 	 * as a single MTD device.
 	 */
