@@ -140,6 +140,31 @@ static struct platform_device lx28xx_watchdog_device = {
     .name       = "watchdog",
     .id     = -1,
 };
+#define PWM_FAN_BASE    0x602f0000
+static struct resource lx28xx_pwm_resource[] = {
+        {
+            .start = (u32)PWM_FAN_BASE,
+            .end   = PWM_FAN_BASE + SZ_64K -1,
+            .flags  = IORESOURCE_MEM,
+        },
+        {
+            .start = LX28XX_PWM_INT + INT_OFFSET,
+            .end   = LX28XX_PWM_INT + INT_OFFSET,
+            .flags  = IORESOURCE_IRQ,
+        },
+
+};
+
+static struct platform_device lx28xx_pwm_device = {
+        .name = "pwmdrv_inno",
+        .id   = 0,
+        .num_resources = ARRAY_SIZE(lx28xx_pwm_resource),
+        .resource = lx28xx_pwm_resource,
+        
+};
+
+
+
 
 /********************************AHB DMA Controller*********************************/
 
@@ -650,6 +675,7 @@ static struct platform_device *lx28xx_platform_devices[] __initdata = {
 //	&lx28xx_rtc_device,
 //	&lx28xx_irda_device,
 
+	&lx28xx_pwm_device,
 };
 
 
