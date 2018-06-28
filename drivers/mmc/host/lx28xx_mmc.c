@@ -1096,7 +1096,7 @@ static irqreturn_t mmc_freechip_irq(int irq, void *dev_id)
 		//debug_mmc("fifo count =%x\n", FIFO_CNT(host));
 		freechip_fifo_data_trans(host,  rw_threshold); //<rw_threshold?cnt:rw_threshold
 		//debug_mmc("after read fifo count =%x\n", FIFO_CNT(host));
-		udelay(4); //must use udelay, or the sd card controller clk will stopped. Why????
+		udelay(60); //must use udelay, or the sd card controller clk will stopped. Why????
 		status = readl(host->base + SD_MINTSTS) & 0xfffe;
 		if(!status){
 			break;
