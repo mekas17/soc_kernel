@@ -246,7 +246,7 @@ static struct clk dmp_gmac_clock = {
 };
 
 static struct stmmac_dma_cfg dmp_dma_cfg = {
-	.pbl = 16,
+	.pbl = 8,
 };
 
 static struct plat_gmac_data dmp_gmac_platform_data=
@@ -259,11 +259,12 @@ static struct plat_gmac_data dmp_gmac_platform_data=
 	.has_gmac = 1,
 	.maxmtu = 1500, 
 	.clk_csr = 0, 
-	.rx_queues_to_use = 2, 
-	.tx_queues_to_use = 2, 
+	.rx_queues_to_use = 1, 
+	.tx_queues_to_use = 1, 
 	.stmmac_clk = &dmp_gmac_clock, 
 	.dma_cfg = &dmp_dma_cfg, 
 	.mdio_bus_data = (struct stmmac_mdio_bus_data *)&dmp_mdio_platform_bus_data,
+	//.mac_port_sel_speed = 100,
 };
 
 static struct platform_device dmp_gmac_device = {

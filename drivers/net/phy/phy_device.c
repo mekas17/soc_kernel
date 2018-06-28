@@ -1322,9 +1322,15 @@ static int genphy_config_eee_advert(struct phy_device *phydev)
  */
 int genphy_setup_forced(struct phy_device *phydev)
 {
+    /*force speed 100M*/
+    #if 0  //add by lzl 20180628
 	int ctl = phy_read(phydev, MII_BMCR);
 
 	ctl &= BMCR_LOOPBACK | BMCR_ISOLATE | BMCR_PDOWN;
+    #else
+    printk(KERN_EMERG"%s %s %d\n", __FILE__, __FUNCTION__, __LINE__);
+    int ctl =0;
+    #endif
 	phydev->pause = 0;
 	phydev->asym_pause = 0;
 
@@ -1373,9 +1379,17 @@ int genphy_config_aneg(struct phy_device *phydev)
 	int err, changed;
 
 	changed = genphy_config_eee_advert(phydev);
-
+    
+    /*force speed 100M*/
+	#if 0  //add by lzl 20.180628
 	if (AUTONEG_ENABLE != phydev->autoneg)
 		return genphy_setup_forced(phydev);
+	#else
+	    phydev->autoneg = AUTONEG_DISABLE;
+		phydev->speed = SPEED_100;
+		phydev->duplex = DUPLEX_FULL;
+		return genphy_setup_forced(phydev);
+	#endif
 
 	err = genphy_config_advert(phydev);
 	if (err < 0) /* error */

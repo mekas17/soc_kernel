@@ -50,6 +50,7 @@
 #include <linux/reset.h>
 #include <linux/of_mdio.h>
 #include "dwmac1000.h"
+#include "dwmac_dma.h"
 
 #define STMMAC_ALIGN(x)	L1_CACHE_ALIGN(x)
 #define	TSO_MAX_BUFF_SIZE	(SZ_16K - 1)
@@ -2448,7 +2449,7 @@ static int stmmac_hw_setup(struct net_device *dev, bool init_ptp)
 	/* PS and related bits will be programmed according to the speed */
 	if (priv->hw->pcs) {
 		int speed = priv->plat->mac_port_sel_speed;
-
+		printk("speed = %d\n", speed);
 		if ((speed == SPEED_10) || (speed == SPEED_100) ||
 		    (speed == SPEED_1000)) {
 			priv->hw->ps = speed;
@@ -2585,18 +2586,18 @@ static int stmmac_open(struct net_device *dev)
 		goto init_error;
 	}
 
-	printk("%s %s %d\n", __FILE__, __FUNCTION__, __LINE__);
+	//printk("%s %s %d\n", __FILE__, __FUNCTION__, __LINE__);
 
 	stmmac_init_tx_coalesce(priv);
 
 	if (dev->phydev)
 		phy_start(dev->phydev);
 
-	printk("%s %s %d\n", __FILE__, __FUNCTION__, __LINE__);
+	//printk("%s %s %d\n", __FILE__, __FUNCTION__, __LINE__);
 	/* Request the IRQ lines */
 	ret = request_irq(dev->irq, stmmac_interrupt,
 			  IRQF_SHARED, dev->name, dev);
-	printk("%s %s %d\n", __FILE__, __FUNCTION__, __LINE__);
+	//printk("%s %s %d\n", __FILE__, __FUNCTION__, __LINE__);
 	if (unlikely(ret < 0)) {
 		netdev_err(priv->dev,
 			   "%s: ERROR: allocating the IRQ %d (error: %d)\n",
@@ -2604,7 +2605,7 @@ static int stmmac_open(struct net_device *dev)
 		goto irq_error;
 	}
 
-	printk("%s %s %d\n", __FILE__, __FUNCTION__, __LINE__);
+	//printk("%s %s %d\n", __FILE__, __FUNCTION__, __LINE__);
 	/* Request the Wake IRQ in case of another line is used for WoL */
 	if (priv->wol_irq != dev->irq) {
 		ret = request_irq(priv->wol_irq, stmmac_interrupt,
@@ -2617,7 +2618,7 @@ static int stmmac_open(struct net_device *dev)
 		}
 	}
 
-	printk("%s %s %d\n", __FILE__, __FUNCTION__, __LINE__);
+	//printk("%s %s %d\n", __FILE__, __FUNCTION__, __LINE__);
 	/* Request the IRQ lines */
 	if (priv->lpi_irq > 0) {
 		ret = request_irq(priv->lpi_irq, stmmac_interrupt, IRQF_SHARED,
@@ -2630,11 +2631,39 @@ static int stmmac_open(struct net_device *dev)
 		}
 	}
 
-	printk("%s %s %d\n", __FILE__, __FUNCTION__, __LINE__);
+	//printk("%s %s %d\n", __FILE__, __FUNCTION__, __LINE__);
 	stmmac_enable_all_queues(priv);
 	stmmac_start_all_queues(priv);
 
-	printk("%s %s %d\n", __FILE__, __FUNCTION__, __LINE__);
+	//printk("%s %s %d\n", __FILE__, __FUNCTION__, __LINE__);
+#if 0
+	printk("GMAC_CONTROL = 0x%x\n", readl(priv->ioaddr + GMAC_CONTROL));
+	printk("GMAC_FRAME_FILTER= 0x%x\n", readl(priv->ioaddr + GMAC_FRAME_FILTER));
+	printk("GMAC_HASH_HIGH = 0x%x\n", readl(priv->ioaddr + GMAC_HASH_HIGH));
+	printk("GMAC_HASH_LOW = 0x%x\n", readl(priv->ioaddr + GMAC_HASH_LOW));
+	printk("GMAC_FLOW_CTRL = 0x%x\n", readl(priv->ioaddr + GMAC_FLOW_CTRL));
+	printk("GMAC_VERSION = 0x%x\n", readl(priv->ioaddr + GMAC_VERSION));
+	printk("GMAC_WAKEUP_FILTER = 0x%x\n", readl(priv->ioaddr + GMAC_WAKEUP_FILTER));
+	printk("GMAC_INT_STATUS = 0x%x\n", readl(priv->ioaddr + GMAC_INT_STATUS));
+
+	printk("DMA_BUS_MODE = 0x%x\n", readl(priv->ioaddr + DMA_BUS_MODE));
+	printk("DMA_XMT_POLL_DEMAND = 0x%x\n", readl(priv->ioaddr + DMA_XMT_POLL_DEMAND));
+	printk("DMA_RCV_POLL_DEMAND = 0x%x\n", readl(priv->ioaddr + DMA_RCV_POLL_DEMAND));
+	printk("DMA_RCV_BASE_ADDR = 0x%x\n", readl(priv->ioaddr + DMA_RCV_BASE_ADDR));
+	printk("DMA_TX_BASE_ADDR = 0x%x\n", readl(priv->ioaddr + DMA_TX_BASE_ADDR));
+	printk("DMA_TX_BASE_ADDR = 0x%x\n", readl(priv->ioaddr + DMA_TX_BASE_ADDR));
+	printk("DMA_STATUS = 0x%x\n", readl(priv->ioaddr + DMA_STATUS));
+	printk("DMA_CONTROL = 0x%x\n", readl(priv->ioaddr + DMA_CONTROL));
+	printk("DMA_INTR_ENA = 0x%x\n", readl(priv->ioaddr + DMA_INTR_ENA));
+	printk("DMA_MISSED_FRAME_CTR = 0x%x\n", readl(priv->ioaddr + DMA_MISSED_FRAME_CTR));
+	printk("DMA_MISSED_FRAME_CTR = 0x%x\n", readl(priv->ioaddr + DMA_MISSED_FRAME_CTR));
+	printk("DMA_RX_WATCHDOG = 0x%x\n", readl(priv->ioaddr + DMA_RX_WATCHDOG));
+	printk("DMA_AXI_BUS_MODE = 0x%x\n", readl(priv->ioaddr + DMA_AXI_BUS_MODE));
+	printk("DMA_HW_FEATURE = 0x%x\n", readl(priv->ioaddr + DMA_HW_FEATURE));
+	printk("DMA_CONTROL_ST = 0x%x\n", readl(priv->ioaddr + DMA_CONTROL_ST));
+	printk("DMA_BUS_MODE = 0x%x\n", readl(priv->ioaddr + DMA_BUS_MODE));
+#endif
+
 	return 0;
 
 lpiirq_error:
@@ -2976,6 +3005,7 @@ static netdev_tx_t stmmac_xmit(struct sk_buff *skb, struct net_device *dev)
 	unsigned int enh_desc;
 	unsigned int des;
 
+	//printk("stmmac xmit...\n");
 	tx_q = &priv->tx_queue[queue];
 
 	/* Manage oversized TCP frames for GMAC4 device */
@@ -3631,6 +3661,7 @@ static irqreturn_t stmmac_interrupt(int irq, void *dev_id)
 	u32 queues_count;
 	u32 queue;
 
+	//printk("stmmac interrupt\n");	
 	queues_count = (rx_cnt > tx_cnt) ? rx_cnt : tx_cnt;
 
 	if (priv->irq_wake)

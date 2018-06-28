@@ -184,4 +184,8 @@ config STMMAC_PCI
 	  If you have a controller with this interface, say Y or M here.
 
 	  If unsure, say N.
+
+config STMMAC_DEBUG
+	bool "STMMAC DEBUG"
+
 endif

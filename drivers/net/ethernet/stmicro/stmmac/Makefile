@@ -27,3 +27,7 @@ dwmac-altr-socfpga-objs := altr_tse_pcs.o dwmac-socfpga.o
 
 obj-$(CONFIG_STMMAC_PCI) += stmmac-pci.o
 stmmac-pci-objs:= stmmac_pci.o
+
+ifeq ($(CONFIG_STMMAC_DEBUG),y)
+	EXTRA_CFLAGS += -DDEBUG
+endif
