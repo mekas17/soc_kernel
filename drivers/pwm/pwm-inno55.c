@@ -50,8 +50,6 @@ static int nOpenFlag = 0;
 
 static int pwm_open(struct inode *inode, struct file *file)
 {
-    uint32_t RegValue0 = 0;
-    uint32_t RegValue1 = 0;
     if(nOpenFlag)
     {
         return -EBUSY;
@@ -97,7 +95,7 @@ static void set_duty_fan1(uint32_t RegValue)
      *((unsigned int *)(pMemMapIO + (0x15 << 2))) = RegValue;
 }
 
-static int pwm_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long pwm_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 {
     switch(cmd)
     {
@@ -167,13 +165,13 @@ static int proc_fan0_freq_open(struct inode *inode,struct file  *file)
     return 0;
 }
 
-static int proc_fan0_freq_read(struct inode *inode,struct file  *file)
+static ssize_t proc_fan0_freq_read(struct file *file, char __user *buffer,size_t count,loff_t *offp)
 {
     printk("0x%08x\n",*((unsigned int *)(pMemMapIO + (0x12 << 2))));
     return 0;
 }
 
-static int proc_fan0_freq_write(struct file *file,const char __user *buffer,size_t count,loff_t *offp)
+static ssize_t proc_fan0_freq_write(struct file *file,const char __user *buffer,size_t count,loff_t *offp)
 {
     uint32_t value = 0;
     char reg[128] = {0};
@@ -198,13 +196,13 @@ static int proc_fan0_duty_open(struct inode *inode,struct file  *file)
     return 0;
 }
 
-static int proc_fan0_duty_read(struct inode *inode,struct file  *file)
+static ssize_t proc_fan0_duty_read(struct file *file, char __user *buffer,size_t count,loff_t *offp)
 {
     printk("0x%08x\n",*((unsigned int *)(pMemMapIO + (0x13 << 2))));
     return 0;
 }
 
-static int proc_fan0_duty_write(struct file *file,const char __user *buffer,size_t count,loff_t *offp)
+static ssize_t proc_fan0_duty_write(struct file *file,const char __user *buffer,size_t count,loff_t *offp)
 {
     uint32_t value = 0;
     char reg[128] = {0};
@@ -229,13 +227,13 @@ static int proc_fan1_freq_open(struct inode *inode,struct file  *file)
     return 0;
 }
 
-static int proc_fan1_freq_read(struct inode *inode,struct file  *file)
+static ssize_t proc_fan1_freq_read(struct file *file, char __user *buffer,size_t count,loff_t *offp)
 {
     printk("0x%08x\n",*((unsigned int *)(pMemMapIO + (0x14 << 2))));
     return 0;
 }
 
-static int proc_fan1_freq_write(struct file *file,const char __user *buffer,size_t count,loff_t *offp)
+static ssize_t proc_fan1_freq_write(struct file *file,const char __user *buffer,size_t count,loff_t *offp)
 {
     uint32_t value = 0;
     char reg[128] = {0};
@@ -260,13 +258,13 @@ static int proc_fan1_duty_open(struct inode *inode,struct file  *file)
     return 0;
 }
 
-static int proc_fan1_duty_read(struct inode *inode,struct file  *file)
+static ssize_t proc_fan1_duty_read(struct file *file, char __user *buffer,size_t count,loff_t *offp)
 {
     printk("0x%08x\n",*((unsigned int *)(pMemMapIO + (0x15 << 2))));
     return 0;
 }
 
-static int proc_fan1_duty_write(struct file *file,const char __user *buffer,size_t count,loff_t *offp)
+static ssize_t proc_fan1_duty_write(struct file *file,const char __user *buffer,size_t count,loff_t *offp)
 {
     uint32_t value = 0;
     char reg[128] = {0};
@@ -392,7 +390,7 @@ static int pwm_55_probe(struct platform_device *pdev)
     pwm_fan_device = device_create(pwm_fan_class, NULL, pwm_fan_devno, NULL, PWM_FAN_DEVNAME);
     if (IS_ERR(pwm_fan_device))
     {
-        class_destroy(pwm_fan_device);
+        class_destroy(pwm_fan_class);
         unregister_chrdev(PWM_FAN_MAJOR, PWM_FAN_DEVNAME);
         return -1;
     }
