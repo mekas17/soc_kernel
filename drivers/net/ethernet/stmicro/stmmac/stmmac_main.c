@@ -117,6 +117,8 @@ static void stmmac_exit_fs(struct net_device *dev);
 #endif
 
 #define STMMAC_COAL_TIMER(x) (jiffies + usecs_to_jiffies(x))
+static char inno_mac_addr_uboot[20] ={0,};
+
 
 /**
  * stmmac_verify_args - verify the driver parameters.
@@ -2546,7 +2548,6 @@ static int stmmac_open(struct net_device *dev)
 	int ret;
 
 	stmmac_check_ether_addr(priv);
-
 	if (priv->hw->pcs != STMMAC_PCS_RGMII &&
 	    priv->hw->pcs != STMMAC_PCS_TBI &&
 	    priv->hw->pcs != STMMAC_PCS_RTBI) {
@@ -4113,6 +4114,26 @@ static int stmmac_hw_init(struct stmmac_priv *priv)
 	return 0;
 }
 
+int mac_str_to_bin( char *str, char *mac)
+{
+    int i;
+    char *s, *e;
+ 
+    if ((mac == NULL) || (str == NULL))
+    {
+        return -1;
+    }
+ 
+    s = (char *) str;
+    for (i = 0; i < 6; ++i)
+    {
+        mac[i] = s ? simple_strtoul (s, &e, 16) : 0;
+        if (s)
+           s = (*e) ? e + 1 : e;
+    }
+    return 0;
+}
+
 /**
  * stmmac_dvr_probe
  * @device: device pointer
@@ -4131,6 +4152,7 @@ int stmmac_dvr_probe(struct device *device,
 	struct stmmac_priv *priv;
 	int ret = 0;
 	u32 queue;
+    char mac_addr[10];
 
 	//printk("%s %s %d\n", __FILE__, __FUNCTION__, __LINE__);
 	ndev = alloc_etherdev_mqs(sizeof(struct stmmac_priv),
@@ -4151,12 +4173,17 @@ int stmmac_dvr_probe(struct device *device,
 	priv->ioaddr = res->addr;
 	priv->dev->base_addr = (unsigned long)res->addr;
 
-	priv->dev->irq = res->irq;
+	priv->dev->irq = res->irq; 
 	priv->wol_irq = res->wol_irq;
 	priv->lpi_irq = res->lpi_irq;
 
+    #if  0  //add by lzl 20180629
 	if (res->mac)
 		memcpy(priv->dev->dev_addr, res->mac, ETH_ALEN);
+    #else
+        mac_str_to_bin(inno_mac_addr_uboot,mac_addr);
+        memcpy(priv->dev->dev_addr, mac_addr, ETH_ALEN);
+    #endif
 
 	//printk("%s %s %d\n", __FILE__, __FUNCTION__, __LINE__);
 	dev_set_drvdata(device, priv->dev);
@@ -4524,6 +4551,16 @@ err:
 
 __setup("stmmaceth=", stmmac_cmdline_opt);
 #endif /* MODULE */
+
+
+static int __init param_mac_setup(char *str)
+{
+    memset(inno_mac_addr_uboot,0,sizeof(inno_mac_addr_uboot));
+    strncpy(inno_mac_addr_uboot, str, sizeof(inno_mac_addr_uboot));
+    
+}
+__setup("mac=", param_mac_setup);
+
 
 static int __init stmmac_init(void)
 {
