@@ -59,14 +59,14 @@
 #define LX28XX_SPI8_INT                  17 // 
 #define LX28XX_SPI9_INT                  18 // 
 #define LX28XX_UART0_INT                 19 // 
-#define LX28XX_UART1_INT                 20 // 
-#define LX28XX_UART2_INT                 21 // 
-#define LX28XX_UART3_INT                 22 // 
-#define LX28XX_UART4_INT                 23 // 
-#define LX28XX_UART5_INT                 24 // 
-#define LX28XX_UART6_INT                 25 // 
-#define LX28XX_UART7_INT                 26 // 
-#define LX28XX_UART8_INT                 27 // 
+#define LX28XX_SUART1_INT                 20 // 
+#define LX28XX_SUART2_INT                 21 // 
+#define LX28XX_SUART3_INT                 22 // 
+#define LX28XX_SUART4_INT                 23 // 
+#define LX28XX_SUART5_INT                 24 // 
+#define LX28XX_SUART6_INT                 25 // 
+#define LX28XX_SUART7_INT                 26 // 
+#define LX28XX_SUART8_INT                 27 // 
 #define LX28XX_GPIO_INT                  28 // 
 #define LX28XX_TIMER0_INT                29 // 
 #define LX28XX_TIMER1_INT                30 // 
@@ -97,8 +97,13 @@
 #define LX28XX_EXT2_INT                  55 // 
 #define LX28XX_EXT3_INT                  56 // 
 #define LX28XX_EXT4_INT                  57 // 
-#define LX28XX_EXT5_INT                  58 // 
-#define LX28XX_EXT6_INT                  59 // 
+#define LX28XX_EXT5_INT                  58 //
+#if  0   //add by lzl 20180524
+#define LX28XX_EXT6_INT                  59 //
+#else
+#define LX28XX_SUART9_INT                  59 //
+#endif
+
 #define LX28XX_PLC_CO_CTRL0_INT          60 // 
 #define LX28XX_PLC_CO_CTRL1_INT          61 // 
 #define LX28XX_ADC_INT                   62 // 

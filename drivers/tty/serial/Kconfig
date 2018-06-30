@@ -1505,6 +1505,30 @@ config SERIAL_ARC_NR_PORTS
 	help
 	  Set this to the number of serial ports you want the driver
 	  to support.
+	  
+	  
+config SERIAL_INNO
+	tristate "INNO UART driver support"
+	select SERIAL_CORE
+	help
+	  Driver for on-chip UART for INNO(Synopsys) for the legacy
+
+config SERIAL_INNO_CONSOLE
+	bool "Console on INNO UART"
+	depends on SERIAL_INNO=y
+	select SERIAL_CORE_CONSOLE
+	select SERIAL_EARLYCON
+	help
+	  Enable system Console on INNO UART
+
+config SERIAL_INNO_NR_PORTS
+	int "Number of INNO UART ports"
+	depends on SERIAL_INNO
+	range 1 9
+	default "9"
+	help
+	  Set this to the number of serial ports you want the driver
+	  to support.
 
 config SERIAL_RP2
 	tristate "Comtrol RocketPort EXPRESS/INFINITY support"

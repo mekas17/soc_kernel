@@ -58,7 +58,7 @@
 #define SERIAL_LX28XX_MAJOR	204
 #define MINOR_START		5
 
-#define NR_PORTS		2
+#define NR_PORTS		1
 
 #define LX28XX_ISR_PASS_LIMIT	256
 

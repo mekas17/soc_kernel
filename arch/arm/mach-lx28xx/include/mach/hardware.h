@@ -102,6 +102,8 @@ INTR SOURCE
 #define PCIO_BASE		0
 
 #define UART_CLK	24000000
+#define SUART_CLK	60000000  //APB clock
+
 
 /////////////////////////////////////////////////////
 /* memory */
@@ -1128,9 +1130,32 @@ INTR SOURCE
 
 /////////////////////////////////////////////////////
 /* UART */ 
-#define UART0_BASE				( APB0_BASE  +  (7<<16))   //(0x60070000 ) //
-#define UART1_BASE				( APB0_BASE  +  (8<<16))  
-#define UART2_BASE				( APB0_BASE  +  (9<<16))  
+#define UART0_BASE				( APB0_BASE  +  (0x7<<16))   //(0x60070000 ) //
+
+#if  0   //add by lzl 20180528
+#define SUART1_BASE				( APB0_BASE  +  (0x8<<16))  
+#define SUART2_BASE				( APB0_BASE  +  (0x9<<16))  
+#define SUART3_BASE				( APB0_BASE  +  (0x11<<16))  
+#define SUART4_BASE				( APB0_BASE  +  (0x12<<16))  
+#define SUART5_BASE				( APB0_BASE  +  (0x19<<16))  
+#define SUART6_BASE				( APB0_BASE  +  (0x1a<<16))  
+#define SUART7_BASE				( APB0_BASE  +  (0x24<<16))  
+#define SUART8_BASE				( APB0_BASE  +  (0x25<<16))  
+#define SUART9_BASE				( APB0_BASE  +  (0x30<<16))
+#else
+#define SUART1_BASE				( 0x60000000  +  (0x8<<16))  
+#define SUART2_BASE				( 0x60000000  +  (0x9<<16))  
+#define SUART3_BASE				( 0x60000000  +  (0x11<<16))  
+#define SUART4_BASE				( 0x60000000  +  (0x12<<16))  
+#define SUART5_BASE				( 0x60000000  +  (0x19<<16))  
+#define SUART6_BASE				( 0x60000000  +  (0x1a<<16))  
+#define SUART7_BASE				( 0x60000000  +  (0x24<<16))  
+#define SUART8_BASE				( 0x60000000  +  (0x25<<16))  
+#define SUART9_BASE				( 0x60000000  +  (0x30<<16))
+#endif
+#define SMAP_SIZE                (0xffff)
+
+
                         		
 #define	rUARTDR0				*((volatile unsigned int *)(UART0_BASE + 0x00))
 #define	rUARTRSR0				*((volatile unsigned int *)(UART0_BASE + 0x04))

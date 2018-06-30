@@ -81,16 +81,6 @@ static struct resource lx28xx_uart_resources[] = {
         .end        = (LX28XX_UART0_INT+INT_OFFSET),
         .flags      = IORESOURCE_IRQ,
     },
-    [2] = {
-        .start      = UART1_BASE,
-        .end        = UART1_BASE + 0xfff,
-        .flags      = IORESOURCE_MEM,
-    },
-    [3] = {
-        .start      = (LX28XX_UART1_INT+INT_OFFSET),
-        .end        = (LX28XX_UART1_INT+INT_OFFSET),
-        .flags      = IORESOURCE_IRQ,
-    },
 };
 
 static u64 uart_dmamask = DMA_BIT_MASK(32);
@@ -109,19 +99,6 @@ struct lx28xx_port lx28xx_ports[] = {
             .line       = 0,
         },
     },
-    {
-        .port   = {
-            .type       = PORT_LX28XX,
-            .iotype     = UPIO_MEM,
-            .membase    = (void __iomem *)UART1_BASE,
-            .mapbase    = UART1_BASE,
-            .irq        = (LX28XX_UART1_INT+INT_OFFSET),
-            .uartclk    = UART_CLK,
-            .fifosize   = 16,
-            .flags      = UPF_BOOT_AUTOCONF,
-            .line       = 1,
-        },
-    },
 };
 
 static struct platform_device lx28xx_uart_device = {
@@ -135,6 +112,252 @@ static struct platform_device lx28xx_uart_device = {
     .num_resources  = ARRAY_SIZE(lx28xx_uart_resources),
     .resource   = lx28xx_uart_resources,
 };
+
+static struct resource lx28xx_suart_resources[] = {
+    [0] = {
+        .start      = (u32)SUART1_BASE,
+        .end        = SUART1_BASE + SMAP_SIZE,
+        .flags      = IORESOURCE_MEM,
+    },
+    [1] = {
+        .start      = (LX28XX_SUART1_INT+INT_OFFSET),
+        .end        = (LX28XX_SUART1_INT+INT_OFFSET),
+        .flags      = IORESOURCE_IRQ,
+    },
+    [2] = {
+        .start      = (u32)SUART2_BASE,
+        .end        = SUART2_BASE + SMAP_SIZE,
+        .flags      = IORESOURCE_MEM,
+    },
+    [3] = {
+        .start      = (LX28XX_SUART2_INT+INT_OFFSET),
+        .end        = (LX28XX_SUART2_INT+INT_OFFSET),
+        .flags      = IORESOURCE_IRQ,
+    },
+     [4] = {
+        .start      = (u32)SUART3_BASE,
+        .end        = SUART3_BASE + SMAP_SIZE,
+        .flags      = IORESOURCE_MEM,
+    },
+    [5] = {
+        .start      = (LX28XX_SUART3_INT+INT_OFFSET),
+        .end        = (LX28XX_SUART3_INT+INT_OFFSET),
+        .flags      = IORESOURCE_IRQ,
+    },
+    [6] = {
+        .start      = (u32)SUART4_BASE,
+        .end        = SUART4_BASE + SMAP_SIZE,
+        .flags      = IORESOURCE_MEM,
+    },
+    [7] = {
+        .start      = (LX28XX_SUART4_INT+INT_OFFSET),
+        .end        = (LX28XX_SUART4_INT+INT_OFFSET),
+        .flags      = IORESOURCE_IRQ,
+    },
+     [8] = {
+        .start      = (u32)SUART5_BASE,
+        .end        = SUART5_BASE + SMAP_SIZE,
+        .flags      = IORESOURCE_MEM,
+    },
+    [9] = {
+        .start      = (LX28XX_SUART5_INT+INT_OFFSET),
+        .end        = (LX28XX_SUART5_INT+INT_OFFSET),
+        .flags      = IORESOURCE_IRQ,
+    },
+    [10] = {
+        .start      = (u32)SUART6_BASE,
+        .end        = SUART6_BASE + SMAP_SIZE,
+        .flags      = IORESOURCE_MEM,
+    },
+    [11] = {
+        .start      = (LX28XX_SUART6_INT+INT_OFFSET),
+        .end        = (LX28XX_SUART6_INT+INT_OFFSET),
+        .flags      = IORESOURCE_IRQ,
+    },
+     [12] = {
+        .start      = (u32)SUART7_BASE,
+        .end        = SUART7_BASE + SMAP_SIZE,
+        .flags      = IORESOURCE_MEM,
+    },
+    [13] = {
+        .start      = (LX28XX_SUART7_INT+INT_OFFSET),
+        .end        = (LX28XX_SUART7_INT+INT_OFFSET),
+        .flags      = IORESOURCE_IRQ,
+    },
+    [14] = {
+        .start      = (u32)SUART8_BASE,
+        .end        = SUART8_BASE + SMAP_SIZE,
+        .flags      = IORESOURCE_MEM,
+    },
+    [15] = {
+        .start      = (LX28XX_SUART8_INT+INT_OFFSET),
+        .end        = (LX28XX_SUART8_INT+INT_OFFSET),
+        .flags      = IORESOURCE_IRQ,
+    },
+     [16] = {
+        .start      = (u32)SUART9_BASE,
+        .end        = SUART9_BASE + SMAP_SIZE,
+        .flags      = IORESOURCE_MEM,
+    },
+    [17] = {
+        .start      = (LX28XX_SUART9_INT+INT_OFFSET),
+        .end        = (LX28XX_SUART9_INT+INT_OFFSET),
+        .flags      = IORESOURCE_IRQ,
+    },
+      
+};
+
+struct inno_uart_port lx28xx_s_ports[] = {
+     {
+        .port   = {
+            .type       = PORT_INNO,
+            .iotype     = UPIO_MEM,
+            .membase    =  (unsigned char __iomem*)SUART1_BASE,
+            .mapbase    = SUART1_BASE,
+            .mapsize    = SMAP_SIZE,
+            .irq        = (LX28XX_SUART1_INT+INT_OFFSET),
+            .uartclk    = SUART_CLK,
+            .fifosize   = 64,
+            .flags      = UPF_BOOT_AUTOCONF,
+            .line       = 0,
+        },
+        .baud  = 9600,
+    },
+    {
+        .port   = {
+            .type       = PORT_INNO,
+            .iotype     = UPIO_MEM,
+            .membase    =  (unsigned char __iomem*)SUART2_BASE,
+            .mapbase    = SUART2_BASE,
+            .mapsize    = SMAP_SIZE,
+            .irq        = (LX28XX_SUART2_INT+INT_OFFSET),
+            .uartclk    = SUART_CLK,
+            .fifosize   = 64,
+            .flags      = UPF_BOOT_AUTOCONF,
+            .line       = 1,
+        },
+         .baud  = 9600,
+    },
+    {
+        .port   = {
+            .type       = PORT_INNO,
+            .iotype     = UPIO_MEM,
+            .membase    =  (unsigned char __iomem*)SUART3_BASE,
+            .mapbase    = SUART3_BASE,
+            .mapsize    = SMAP_SIZE,
+            .irq        = (LX28XX_SUART3_INT+INT_OFFSET),
+            .uartclk    = SUART_CLK,
+            .fifosize   = 64,
+            .flags      = UPF_BOOT_AUTOCONF,
+            .line       = 2,
+        },
+         .baud  = 9600,
+    },
+    {
+        .port   = {
+            .type       = PORT_INNO,
+            .iotype     = UPIO_MEM,
+            .membase    =  (unsigned char __iomem*)SUART4_BASE,
+            .mapbase    = SUART4_BASE,
+            .mapsize    = SMAP_SIZE,
+            .irq        = (LX28XX_SUART4_INT+INT_OFFSET),
+            .uartclk    = SUART_CLK,
+            .fifosize   = 64,
+            .flags      = UPF_BOOT_AUTOCONF,
+            .line       = 3,
+        },
+         .baud  = 9600,
+    },
+    {
+        .port   = {
+            .type       = PORT_INNO,
+            .iotype     = UPIO_MEM,
+            .membase    =  (unsigned char __iomem*)SUART5_BASE,
+            .mapbase    = SUART5_BASE,
+            .mapsize    = SMAP_SIZE,
+            .irq        = (LX28XX_SUART5_INT+INT_OFFSET),
+            .uartclk    = SUART_CLK,
+            .fifosize   = 64,
+            .flags      = UPF_BOOT_AUTOCONF,
+            .line       = 4,
+        },
+         .baud  = 9600,
+    },
+    {
+        .port   = {
+            .type       = PORT_INNO,
+            .iotype     = UPIO_MEM,
+            .membase    =  (unsigned char __iomem*)SUART6_BASE,
+            .mapbase    = SUART6_BASE,
+            .mapsize    = SMAP_SIZE,
+            .irq        = (LX28XX_SUART6_INT+INT_OFFSET),
+            .uartclk    = SUART_CLK,
+            .fifosize   = 64,
+            .flags      = UPF_BOOT_AUTOCONF,
+            .line       = 5,
+        },
+         .baud  = 9600,
+    },
+    {
+        .port   = {
+            .type       = PORT_INNO,
+            .iotype     = UPIO_MEM,
+            .membase    =  (unsigned char __iomem*)SUART7_BASE,
+            .mapbase    = SUART7_BASE,
+            .mapsize    = SMAP_SIZE,
+            .irq        = (LX28XX_SUART7_INT+INT_OFFSET),
+            .uartclk    = SUART_CLK,
+            .fifosize   = 64,
+            .flags      = UPF_BOOT_AUTOCONF,
+            .line       = 6,
+        },
+         .baud  = 9600,
+    },
+    {
+        .port   = {
+            .type       = PORT_INNO,
+            .iotype     = UPIO_MEM,
+            .membase    =  (unsigned char __iomem*)SUART8_BASE,
+            .mapbase    = SUART8_BASE,
+            .mapsize    = SMAP_SIZE,
+            .irq        = (LX28XX_SUART8_INT+INT_OFFSET),
+            .uartclk    = SUART_CLK,
+            .fifosize   = 64,
+            .flags      = UPF_BOOT_AUTOCONF,
+            .line       = 7,
+        },
+         .baud  = 9600,
+    },
+    {
+        .port   = {
+            .type       = PORT_INNO,
+            .iotype     = UPIO_MEM,
+            .membase    =  (unsigned char __iomem*)SUART9_BASE,
+            .mapbase    = SUART9_BASE,
+            .mapsize    = SMAP_SIZE,
+            .irq        = (LX28XX_SUART9_INT+INT_OFFSET),
+            .uartclk    = SUART_CLK,
+            .fifosize   = 64,
+            .flags      = UPF_BOOT_AUTOCONF,
+            .line       = 8,
+        },
+         .baud  = 115200,
+    }, 
+};
+EXPORT_SYMBOL(lx28xx_s_ports);
+
+static struct platform_device lx28xx_suart_device = {
+    .name       = "inno-uart",
+    .id     = -1,
+    .dev = {
+        //.dma_mask       = &uart_dmamask,
+        //.coherent_dma_mask  = DMA_BIT_MASK(32),
+        .platform_data = lx28xx_s_ports,
+    },
+    .num_resources  = ARRAY_SIZE(lx28xx_suart_resources),
+    .resource   = lx28xx_suart_resources,
+};
+
 
 static struct platform_device lx28xx_watchdog_device = {
     .name       = "watchdog",
@@ -675,8 +898,8 @@ static struct platform_device *lx28xx_platform_devices[] __initdata = {
 //	&lx28xx_iis_device,
 //	&lx28xx_rtc_device,
 //	&lx28xx_irda_device,
+	&lx28xx_suart_device,
 
-	&lx28xx_pwm_device,
 };
 
 
@@ -716,9 +939,15 @@ static __init void lx28xx_evm_init(void)
 
 }
 
+static void lx28xx_watchdog_reset(void)
+{
+    *((volatile unsigned int *)LX28XX_WDT_BASE) = 0x3;
+}
+
 void lx28xx_restart(enum reboot_mode mode, const char *cmd)
 {
 	//lx28xx_watchdog_reset(); need to fix
+	lx28xx_watchdog_reset();
 }
 
 void __init lx28xx_init_late(void)

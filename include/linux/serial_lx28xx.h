@@ -30,6 +30,12 @@ struct lx28xx_port {
 	unsigned int		old_status;
 };
 
+struct inno_uart_port {
+	struct uart_port port;
+	unsigned long baud;
+};
+
+
 
 /*
  * Access routines for the DMP UARTs
