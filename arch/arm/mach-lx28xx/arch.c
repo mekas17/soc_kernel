@@ -900,6 +900,7 @@ static struct platform_device *lx28xx_platform_devices[] __initdata = {
 //	&lx28xx_irda_device,
 	&lx28xx_suart_device,
 
+    &lx28xx_pwm_device,
 };
 
 
