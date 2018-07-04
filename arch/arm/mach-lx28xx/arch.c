@@ -523,8 +523,70 @@ static struct platform_device lx28xx_mac_device = {
 
 
 /********************************Nand Controller*********************************/
-
-
+#if 1
+struct mtd_partition lx28xx_evm_nandflash_partition[] = {
+	{
+		.name		= "spl",
+		.offset		= 0,
+		.size		= SZ_128K, //SZ_256K + SZ_128K,
+		.mask_flags	= 0,
+	},
+	{
+		.name		= "bootA",
+		.offset		= MTDPART_OFS_APPEND,
+		.size 		= SZ_512K,
+		.mask_flags	= 0,
+	},
+	{
+		.name		= "bootB",
+		.offset		= MTDPART_OFS_APPEND,
+		.size		= SZ_512K,
+		.mask_flags	= 0,
+	},
+	{
+		.name		= "emv",
+		.offset		= MTDPART_OFS_APPEND,
+		.size		= SZ_1M - SZ_128K,
+		.mask_flags	= 0,
+	},
+	{
+		.name		= "kernelA",
+		.offset		= MTDPART_OFS_APPEND,
+		.size		= SZ_4M + SZ_2M + SZ_1M,
+		.mask_flags	= 0,
+	},
+	{
+		.name		= "kernelB",
+		.offset		= MTDPART_OFS_APPEND,
+		.size 		= SZ_4M + SZ_2M + SZ_1M,
+		.mask_flags	= 0,
+	},
+	{
+		.name		= "rootfsA",
+		.offset		= MTDPART_OFS_APPEND,
+		.size		= SZ_64M + SZ_32M,
+		.mask_flags	= 0,
+	},
+	{
+		.name		= "rootfsB",
+		.offset		= MTDPART_OFS_APPEND,
+		.size		= SZ_64M + SZ_32M,
+		.mask_flags	= 0,
+	},
+	{
+		.name		= "config",
+		.offset		= MTDPART_OFS_APPEND,
+		.size		= SZ_8M,
+		.mask_flags	= 0,
+	},
+	{
+		.name		= "reserevd",
+		.offset		= MTDPART_OFS_APPEND,
+		.size		= MTDPART_SIZ_FULL,
+		.mask_flags	= 0,
+	}
+};
+#else
 struct mtd_partition lx28xx_evm_nandflash_partition[] = {
 	{
 		.name		= "boot",
@@ -554,7 +616,7 @@ struct mtd_partition lx28xx_evm_nandflash_partition[] = {
 		.mask_flags	= 0,
 	}
 };
-
+#endif
 static struct freechip_nand_pdata lx28xx_evm_nandflash_data = {
 	.parts		= lx28xx_evm_nandflash_partition,
 	.nr_parts	= ARRAY_SIZE(lx28xx_evm_nandflash_partition),
