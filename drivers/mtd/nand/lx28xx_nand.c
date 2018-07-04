@@ -132,8 +132,11 @@ static void nand_freechip_hwcontrol(struct mtd_info *mtd, int cmd,
 			nand_freechip_select_chip(mtd, -1);
 	}
 
-	if (cmd != NAND_CMD_NONE)
+	if (cmd != NAND_CMD_NONE) {
+		//printk("%x \n", (u8)cmd);
+		//udelay(20);
 		iowrite8(cmd, nand->IO_ADDR_W);
+	}
 }
 
 
@@ -499,21 +502,24 @@ static int t18_nand_read_page_hwecc(struct mtd_info *mtd, struct nand_chip *chip
 	u32 pdst[512/4];
 	int j, cell;
 	u8 *pd;
+	u32 eccstat_failed;
 
 	//printk("t18 nand read one page hwecc @page %d\n", page);
-	//printk("@p%d\n", page);
+	//printk("r@p%d\n", page);
 	//printk("eccsize = %d, eccbytes = %d, eccsteps = %d\n", eccsize, eccbytes, eccsteps);
-	//mdelay(1);
-	udelay(20);
+	mdelay(1);
+	//udelay(20);
 
+	eccstat_failed = mtd->ecc_stats.failed;
 	for (i = 0; eccsteps; eccsteps--, i += eccbytes, p += eccsize) {
 		//printk("readlen = %d\n", readlen);
 		chip->read_buf(mtd, (u8 *)psrc, readlen);
 #if 0
-		//if (page > 7000) {
+		//if ((page > 37825) || (page == 7256)) {
+		if (page  > 21377) {
 		//////////////////////////////////////
 		j = readlen >> 4;
-		pd = psrc;
+		pd = (u8 *)psrc;
 		printk("before decoder: \n");
 		while (j--) {
 			printk("\t%02x %02x %02x %02x %02x %02x %02x %02x"
@@ -524,7 +530,7 @@ static int t18_nand_read_page_hwecc(struct mtd_info *mtd, struct nand_chip *chip
 			pd += 16;
 		}
 		/////////////////////////////////////
-		//}
+		}
 #endif
 		stat = t18_nand_ecc_decoder(mtd, (u8 *)psrc, (u8 *)pdst);
 		memcpy(p, (u8 *)pdst, eccsize);
@@ -543,14 +549,17 @@ static int t18_nand_read_page_hwecc(struct mtd_info *mtd, struct nand_chip *chip
 		}
 		/////////////////////////////////////
 #endif
+#if 1 // active ecc flag
 #if 1
 		// make erased cell ecc correct
 		if (stat) {
-			printk("t18 ecc result adjuct\n");
-			cell = eccbytes / 4;
+			//printk("t18 ecc result adjuct\n");
+			cell = eccsize / 4;
 			while (cell--) {
-				if (psrc[cell] != 0xffffffff)
+				if (psrc[cell] != 0xffffffff) {
+					printk("%x %d %d\n", psrc[cell], cell, eccsteps);
 					goto t18_nand_read_exit;
+				}
 			}
 			stat = 0;
 		}
@@ -561,8 +570,8 @@ t18_nand_read_exit:
 #if 0
 			//////////////////////////////////////
 			j = readlen >> 4;
-			pd = psrc;
-			printk("before decoder: \n");
+			pd = (u8 *)psrc;
+			printk("before decoder: @%d\n", eccsteps);
 			while (j--) {
 				printk("\t%02x %02x %02x %02x %02x %02x %02x %02x"
 					  "  %02x %02x %02x %02x %02x %02x %02x %02x\n",
@@ -572,6 +581,8 @@ t18_nand_read_exit:
 				pd += 16;
 			}
 			/////////////////////////////////////
+#endif
+#if 0
 			//////////////////////////////////////
 			j = eccsize >> 4;
 			pd = p;
@@ -588,10 +599,17 @@ t18_nand_read_exit:
 #endif
 
 		}
-		else
-			mtd->ecc_stats.corrected++;
+		//else
+		//	mtd->ecc_stats.corrected++;
+		mtd->ecc_stats.corrected = 0;
+#else
+		mtd->ecc_stats.failed = 0;
+		mtd->ecc_stats.corrected = 0;
+#endif
 	}
 	//printk("ecc_stats.failed = %d, ecc_status.corrected = %d\n", mtd->ecc_stats.failed, mtd->ecc_stats.corrected);
+	if (eccstat_failed != mtd->ecc_stats.failed)
+		printk("ecc_stats.failed = %d\n", mtd->ecc_stats.failed);
 	return 0;
 }
 
@@ -614,15 +632,36 @@ static int t18_nand_write_page_hwecc(struct mtd_info *mtd, struct nand_chip *chi
 	u32 pdst[528/4];
 	u8 *pd;
 	int j;
+	int cell;
 
 	//printk("t18 nand write page hwecc\n");
+	//printk("w@p%d\n", page);
+	mdelay(1);
 	for (i = 0; eccsteps; eccsteps--, i += eccbytes, p += eccsize) {
 		memcpy((u8 *)psrc, p, eccsize);
+		cell = eccsize / 4;
+		while (cell--) {
+			if (psrc[cell] != 0xffffffff) {
+				goto t18_nand_ecc_do_encoder;
+			}
+		}
+		memcpy((u8 *)pdst, (u8 *)psrc, eccsize);
+		pdst[eccsize/4] = 0xffffffff;
+		pdst[eccsize/4+1] = 0xffffffff;
+		pdst[eccsize/4+2] = 0xffffffff;
+		pdst[eccsize/4+3] = 0xffffffff;
+		goto t18_nand_ecc_do_write_page;
+t18_nand_ecc_do_encoder:
 		t18_nand_ecc_encoder(mtd, (u8 *)psrc, (u8 *)pdst);
+t18_nand_ecc_do_write_page:
 		chip->write_buf(mtd, (u8 *)pdst, writelen);
 #if 0
+		//if (page > 37825) {
+		//if (page > 21377) {
+		//if ((page == 5699) || (page == 7262)) {
+		if (page == 8896) {
 		j = writelen >> 4;
-		pd = pdst;
+		pd = (u8 *)pdst;
 		printk("ENCODED: \n");
 		while (j--) {
 			printk("\t%02x %02x %02x %02x %02x %02x %02x %02x"
@@ -632,9 +671,10 @@ static int t18_nand_write_page_hwecc(struct mtd_info *mtd, struct nand_chip *chi
 				   pd[15]);
 			pd += 16;
 		}
+		}
 #endif
-
 	}
+	mdelay(1);
 	return 0;
 }
 
@@ -644,6 +684,12 @@ static int t18_nand_write_subpage_hwecc(struct mtd_info *mtd,
 				int oob_required, int page)
 {
 	return t18_nand_write_page_hwecc(mtd, chip, buf, oob_required, page);
+}
+
+static int t18_nand_write_oob(struct mtd_info *mtd, struct nand_chip *chip,
+			int page)
+{
+	printk("t18 nand write oob none\n");
 }
 
 /*----------------------------------------------------------------------*/
@@ -661,14 +707,21 @@ static void nand_freechip_read_buf(struct mtd_info *mtd, uint8_t *buf, int len)
 {
 	//struct nand_chip *chip = mtd->priv;
 	struct nand_chip *chip = mtd_to_nand(mtd);
+#if 0
+	u32 *data = (u32 * )buf;
+	int i;
 
+	for (i = 0; i < (len >> 2); i++)
+		*data++ = ioread32(chip->IO_ADDR_R);
+#endif
+#if 1
 	if ((0x03 & ((unsigned)buf)) == 0 && (0x03 & len) == 0)
 		ioread32_rep(chip->IO_ADDR_R, buf, len >> 2);
 	else if ((0x01 & ((unsigned)buf)) == 0 && (0x01 & len) == 0)
 		ioread16_rep(chip->IO_ADDR_R, buf, len >> 1);
 	else
 		ioread8_rep(chip->IO_ADDR_R, buf, len);
-	
+#endif
 }
 
 static void nand_freechip_write_buf(struct mtd_info *mtd,
@@ -676,13 +729,21 @@ static void nand_freechip_write_buf(struct mtd_info *mtd,
 {
 	//struct nand_chip *chip = mtd->priv;
 	struct nand_chip *chip = mtd_to_nand(mtd);
+#if 0
+	u32 *data = (u32 *)buf;
+	int i;
 
+	for (i = 0; i < (len >> 2); i++)
+		iowrite32(*data++, chip->IO_ADDR_W);
+#endif
+#if 1
 	if ((0x03 & ((unsigned)buf)) == 0 && (0x03 & len) == 0)
 		iowrite32_rep(chip->IO_ADDR_R, buf, len >> 2);
 	else if ((0x01 & ((unsigned)buf)) == 0 && (0x01 & len) == 0)
 		iowrite16_rep(chip->IO_ADDR_R, buf, len >> 1);
 	else
 		iowrite8_rep(chip->IO_ADDR_R, buf, len);
+#endif
 }
 
 static u32 nand_read_long(struct mtd_info *mtd)
@@ -714,6 +775,12 @@ static int nand_freechip_dev_ready(struct mtd_info *mtd)
 	return freechip_nand_readl(info, NAND_STATUS_OFFSET) & BIT(7);
 }
 
+static int nand_freechip_block_bad(struct mtd_info *mtd, loff_t ofs)
+{
+	//printk("lx28xx blcok bad\n");
+	return 0;
+}
+
 static void __init nand_t18xxevm_flash_init(struct freechip_nand_info *info)
 {
 	uint32_t regval, a1cr;
@@ -723,6 +790,7 @@ static void __init nand_t18xxevm_flash_init(struct freechip_nand_info *info)
 	//freechip_nand_writel(info, A1CR_OFFSET, regval);
 	freechip_nand_writel(info,NAND_CR_OFFSET, regval);
 }
+
 #if 0
 /*----------------------------------------------------------------------*/
 
@@ -826,10 +894,11 @@ static int __init nand_freechip_probe(struct platform_device *pdev)
 	info->core_chipsel	= pdev->id;
 	info->mask_chipsel	= pdata->mask_chipsel;
 
-
+	info->chip.block_bad = nand_freechip_block_bad;
 	/* Set address of hardware control function */
 	info->chip.cmd_ctrl	= nand_freechip_hwcontrol;
-	info->chip.dev_ready	= nand_freechip_dev_ready;
+	//info->chip.dev_ready	= nand_freechip_dev_ready;
+	info->chip.chip_delay = 400000;
 
 	/* Speed up buffer I/O */
 	info->chip.read_buf     = nand_freechip_read_buf;
@@ -887,6 +956,7 @@ static int __init nand_freechip_probe(struct platform_device *pdev)
 		info->chip.ecc.write_subpage = t18_nand_write_subpage_hwecc;
 		info->chip.ecc.read_page = t18_nand_read_page_hwecc;
 		info->chip.ecc.read_subpage = t18_nand_read_subpage_hwecc;
+		info->chip.ecc.write_oob = t18_nand_write_oob;
 		info->chip.ecc.size = 512;
 		info->chip.ecc.strength = 9;
 		info->chip.ecc.bytes = 16;
@@ -917,7 +987,7 @@ static int __init nand_freechip_probe(struct platform_device *pdev)
 	 * have this special casing for the T18xx EVM is to work
 	 * with boot-from-SPI...
 	 */
-	//printk("%s %s %d\n", __FILE__, __FUNCTION__, __LINE__);
+	printk("%s %s %d\n", __FILE__, __FUNCTION__, __LINE__);
 	nand_t18xxevm_flash_init(info);
 
 	spin_lock_irq(&freechip_nand_lock);
@@ -988,7 +1058,7 @@ syndrome_done:
 	if (ret < 0)
 		goto err_scan;
 
-	//printk("%s %s %d\n", __FILE__, __FUNCTION__, __LINE__);
+	printk("%s %s %d\n", __FILE__, __FUNCTION__, __LINE__);
 	if (mtd_has_partitions()) {
 		struct mtd_partitions	mtd_parts;
 		int			mtd_parts_nb = 0;
@@ -1022,7 +1092,7 @@ syndrome_done:
 				pdata->nr_parts, info->chip.mtd.name);
 	}
 
-	//printk("%s %s %d\n", __FILE__, __FUNCTION__, __LINE__);
+	printk("%s %s %d\n", __FILE__, __FUNCTION__, __LINE__);
 	/* If there's no partition info, just package the whole chip
 	 * as a single MTD device.
 	 */

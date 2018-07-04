@@ -544,7 +544,7 @@ struct mtd_partition lx28xx_evm_nandflash_partition[] = {
 	{
 		.name		= "base",
 		.offset		= MTDPART_OFS_APPEND,
-		.size		= SZ_32M,
+		.size		= SZ_64M,
 		.mask_flags	= 0,
 	},
 	{

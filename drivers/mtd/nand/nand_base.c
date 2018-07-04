@@ -636,7 +636,7 @@ static void panic_nand_wait_ready(struct mtd_info *mtd, unsigned long timeo)
  *
  * Wait for the ready pin after a command, and warn if a timeout occurs.
  */
-#if 0
+#if 1
 void nand_wait_ready(struct mtd_info *mtd)
 {
 	struct nand_chip *chip = mtd_to_nand(mtd);
@@ -656,7 +656,7 @@ void nand_wait_ready(struct mtd_info *mtd)
 	if (!chip->dev_ready(mtd))
 		pr_warn_ratelimited("timeout while waiting for chip to become ready\n");
 }
-#endif
+#else
 void nand_wait_ready(struct mtd_info *mtd)
 {
 	struct nand_chip *chip = mtd->priv;
@@ -675,7 +675,7 @@ void nand_wait_ready(struct mtd_info *mtd)
 	} while (time_before(jiffies, timeo));
 	//led_trigger_event(nand_led_trigger, LED_OFF);
 }
-
+#endif
 
 EXPORT_SYMBOL_GPL(nand_wait_ready);
 

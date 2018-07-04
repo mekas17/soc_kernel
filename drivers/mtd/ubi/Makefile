@@ -9,5 +9,5 @@ ubi-$(CONFIG_MTD_UBI_BLOCK) += block.o
 obj-$(CONFIG_MTD_UBI_GLUEBI) += gluebi.o
 
 ifeq ($(CONFIG_MTD_UBI_DEBUG),y)
-	EXTRA_CFLAG += -DDEBUG
+	EXTRA_CFLAGS += -DDEBUG
 endif
