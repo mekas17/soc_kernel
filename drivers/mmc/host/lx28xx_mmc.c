@@ -210,6 +210,10 @@
 #define sd_readl(host, reg)	readl(host->base + reg)
 #define sd_writel(host, reg , val)	writel(val, host->base + reg)
 
+#define SET_BIT(x,y)          ((x) |= (1<<(y)))
+#define CLEAR_BIT(x,y)        ((x) &= ~(1<<(y)))
+
+
 
 
 static u32 volatile flag_test=0;
@@ -977,6 +981,69 @@ static ssize_t mmc_status_store(struct device *dev,
 
 }
 
+static void  change_plug_pin_trigger_type(unsigned int plug_status)
+{
+    unsigned int tmp;
+
+    //plug_status = sd_readl(host, SD_CDETECT);
+    tmp = *(volatile unsigned int *)(LX28XX_GPIO_BASE + GPIO9_8_INT_POLARITY);
+    if (1 == plug_status)//unplug:high
+    {
+        *(volatile unsigned int *)(LX28XX_GPIO_BASE + GPIO9_8_INT_POLARITY) = CLEAR_BIT(tmp,11);
+    }
+    else
+    {
+        *(volatile unsigned int *)(LX28XX_GPIO_BASE + GPIO9_8_INT_POLARITY) = SET_BIT(tmp,11);
+    }
+    return ;
+}
+
+static void set_sd_hot_plug_pin(void)
+{
+    unsigned int tmp;
+    
+    PAD9CTL = 8;
+    PADMODE8 = 0x810;
+    
+    tmp = *(volatile unsigned int *)(LX28XX_GPIO_BASE + GPIO9_8_INT_ENABLE);
+    *(volatile unsigned int *)(LX28XX_GPIO_BASE + GPIO9_8_INT_ENABLE) = SET_BIT(tmp,11);
+
+    tmp = *(volatile unsigned int *)(LX28XX_GPIO_BASE + GPIO9_8_INT_MASK);
+    *(volatile unsigned int *)(LX28XX_GPIO_BASE + GPIO9_8_INT_MASK) = CLEAR_BIT(tmp,11);
+
+     tmp = *(volatile unsigned int *)(LX28XX_GPIO_BASE + GPIO9_8_INT_TYPE);
+    *(volatile unsigned int *)(LX28XX_GPIO_BASE + GPIO9_8_INT_TYPE) = SET_BIT(tmp,11);
+
+     tmp = *(volatile unsigned int *)(LX28XX_GPIO_BASE + GPIO9_8_INT_POLARITY);
+    *(volatile unsigned int *)(LX28XX_GPIO_BASE + GPIO9_8_INT_POLARITY) = CLEAR_BIT(tmp,11);
+     return;
+}
+
+static irqreturn_t mmc_freechip_hot_plug_irq(int irq, void *dev_id)
+{
+    unsigned int irq_status = *(volatile unsigned int *)(LX28XX_GPIO_BASE + GPIO9_8_INT_STATUS);
+    struct mmc_freechip_host *host = (struct mmc_freechip_host *)(dev_id);
+    unsigned int tmp;
+    unsigned int plug_status;
+
+    if (irq_status & (0x1<<11))
+    {
+        tmp = *(volatile unsigned int *)(LX28XX_GPIO_BASE + GPIO9_8_INT_ENABLE);
+        *(volatile unsigned int *)(LX28XX_GPIO_BASE + GPIO9_8_INT_ENABLE) = CLEAR_BIT(tmp,11);
+        
+        mmc_detect_change(host->mmc, msecs_to_jiffies(HZ/5));
+        
+        *(volatile unsigned int *)(LX28XX_GPIO_BASE + GPIO9_8_INT_ENABLE) = SET_BIT(tmp,11);
+        //plug_status = sd_readl(host, SD_CDETECT);
+        
+        tmp = *(volatile unsigned int *)(LX28XX_GPIO_BASE + GPIO_9_8_DATAIN);
+        plug_status = ((tmp >> 11) & 0x1 );
+        change_plug_pin_trigger_type(plug_status);
+    }
+    
+	return IRQ_HANDLED;
+}
+
 
 
 static irqreturn_t mmc_freechip_sdio_irq(int irq, void *dev_id)
@@ -1360,6 +1427,16 @@ static  int __init freechip_mmcsd_probe(struct platform_device *pdev)
 		mmc_hostname(mmc), host);
 	if (ret)
 		goto out;
+    
+    #if  1   //add by lzl 20180705
+    set_sd_hot_plug_pin();
+    ret = request_irq(60, mmc_freechip_hot_plug_irq, 0,mmc_hostname(mmc), host);
+	if (ret)
+	{
+         printk(KERN_EMERG"---@lzl@---%s   %s   %d\n",__FILE__,__func__,__LINE__);
+         goto out;
+    }
+    #endif
 
 	if (host->sdio_irq > 0) {
 		ret = request_irq(host->sdio_irq,
@@ -1421,6 +1498,11 @@ static int __exit freechip_mmcsd_remove(struct platform_device *pdev)
 		mmc_remove_host(host->mmc);
 
 		free_irq(host->mmc_irq, host);
+
+        #if  1  //add by lzl 20180705
+        printk(KERN_EMERG"---@lzl@---%s   %s   %d\n",__FILE__,__func__,__LINE__);
+        free_irq(60, host);
+        #endif
 
 		if (host->mmc->caps & MMC_CAP_SDIO_IRQ)
 			free_irq(host->sdio_irq, host);

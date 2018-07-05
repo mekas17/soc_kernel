@@ -1402,6 +1402,14 @@ INTR SOURCE
 #define LX28XX_SPI_PA		(( APB0_BASE  +  (15<<16)))
 #define LX28XX_SPI_BASE		(LX28XX_VA_APB_SYS + 0xf000)
 
+/**************************** SD HOT PLUT INTERRUPT DETECT PIN *********************/
+#define GPIO9_8_INT_ENABLE      (0x130)
+#define GPIO9_8_INT_MASK        (0x134)
+#define GPIO9_8_INT_TYPE        (0x138)
+#define GPIO9_8_INT_POLARITY    (0x13c)
+#define GPIO9_8_INT_STATUS      (0x140)
+
+
 
 
 #endif /* __ASM_ARCH_HARDWARE_H */
