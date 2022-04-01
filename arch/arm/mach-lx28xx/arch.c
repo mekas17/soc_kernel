@@ -580,11 +580,24 @@ struct mtd_partition lx28xx_evm_nandflash_partition[] = {
 		.mask_flags	= 0,
 	},
 	{
+		.name		= "log",
+		.offset		= MTDPART_OFS_APPEND,
+		.size		= SZ_8M + SZ_2M,
+		.mask_flags	= 0,
+	},
+	{
+		.name		= "bbt",
+		.offset		= MTDPART_OFS_APPEND,
+		.size		= SZ_8M - SZ_2M,
+		.mask_flags	= 0,
+	},
+	{
 		.name		= "reserevd",
 		.offset		= MTDPART_OFS_APPEND,
 		.size		= MTDPART_SIZ_FULL,
 		.mask_flags	= 0,
 	}
+ 
 };
 #else
 struct mtd_partition lx28xx_evm_nandflash_partition[] = {
@@ -620,7 +633,7 @@ struct mtd_partition lx28xx_evm_nandflash_partition[] = {
 static struct freechip_nand_pdata lx28xx_evm_nandflash_data = {
 	.parts		= lx28xx_evm_nandflash_partition,
 	.nr_parts	= ARRAY_SIZE(lx28xx_evm_nandflash_partition),
-	.ecc_mode	= NAND_ECC_HW,
+	.ecc_mode	= NAND_ECC_NONE,
 	.options	= NAND_SKIP_BBTSCAN, //NAND_USE_FLASH_BBT,
 };
 
